@@ -1,14 +1,12 @@
 using Bogus;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using SeleniumFramework.Models;
 using SeleniumFramework.Pages;
 using SeleniumFramework.Utilities;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
 
 namespace SeleniumFramework
 {
+    [Ignore("No longer needed in this implementation")]
     [TestFixture]
     public class LoginTests
     {
@@ -25,12 +23,7 @@ namespace SeleniumFramework
         [SetUp]
         public void Setup()
         {
-            new DriverManager().SetUpDriver(new ChromeConfig());
-
-            _driver = new ChromeDriver();
-            _driver.Manage().Window.Maximize();
-            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-
+            
             _loginPage = new LoginPage(_driver);
             _driver.Navigate().GoToUrl(_settingsModel.BaseUrl);
         }
@@ -45,6 +38,7 @@ namespace SeleniumFramework
         [Test]
         public void LoginWith_ExistingUser_ShowsShowTheDashboard()
         {
+            _loginPage.VerifyTheFormIsVisible();
             _loginPage.LoginWith(_settingsModel.Email, _settingsModel.Password);
 
             var dashboardPage = new DashboardPage(_driver);

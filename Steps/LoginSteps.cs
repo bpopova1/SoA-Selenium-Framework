@@ -1,0 +1,97 @@
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using Reqnroll;
+using SeleniumFramework.Models;
+using SeleniumFramework.Pages;
+using SeleniumFramework.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
+
+namespace SeleniumFramework.Steps
+{
+    [Binding]
+    public class LoginSteps
+    {
+        private IWebDriver _driver;
+        private LoginPage _loginPage;
+
+        private readonly SettingsModel _settingsModel;
+
+        public LoginSteps(IWebDriver driver, SettingsModel model)
+        {
+            this._driver = driver;
+            this._settingsModel = model;
+        }
+
+        [BeforeScenario]
+        public void BeforeScenario()
+        {
+            _loginPage = new LoginPage(_driver);
+        }
+
+        [AfterScenario]
+        public void AfterScenario()
+        {
+            _driver.Quit();
+        }
+
+        [Given("I navigate to the main page")]
+        public void GivenINavigateToTheMainPage()
+        {
+            _driver.Navigate().GoToUrl(_settingsModel.BaseUrl);
+        }
+
+        [Given("I verify that the login form is displayed")]
+        public void GivenIVerifyThatTheLoginFormIsDisplayed()
+        {
+            _loginPage.VerifyTheFormIsVisible();
+        }
+
+        [When("I login with valid credentials")]
+        public void WhenILoginWithValidCredentials()
+        {
+            _loginPage.LoginWith(_settingsModel.Email, _settingsModel.Password);
+        }
+
+        [When("I login with invalid credentials")]
+        public void WhenILoginWithInvalidCredentials()
+        {
+            _loginPage.LoginWith("notexistinguser@gmail.com", _settingsModel.Password);
+        }
+
+        [When("I login with {string} and {string}")]
+        public void WhenILoginWithAnd(string email, string password)
+        {
+            if (email == "readFromSettings")
+            {
+                WhenILoginWithValidCredentials();
+            }
+            else
+                _loginPage.LoginWith(email, password);
+        }
+
+        [Then("I should still be on the login page")]
+        public void ThenIShouldStillBeOnTheLoginPage()
+        {
+            Assert.That(_driver.Url, Is.EqualTo(_settingsModel.BaseUrl + "login.php"));
+        }
+
+        [Then("I should an error message with the following text {string}")]
+        public void ThenIShouldAnErrorMessageWithTheFollowingText(string errorText)
+        {
+            Retry.Until(() =>
+            {
+                if (!_loginPage.IsPasswordEmpty())
+                    throw new RetryException("Password input is not empty yet.");
+            });
+
+            _loginPage.VerifyPasswordInputIsEmpty();
+            _loginPage.VerifyErrorMessageIsDisplayed(errorText);
+        }
+    }
+}

@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using SeleniumFramework.Extensions;
 
 namespace SeleniumFramework.Pages
 {
@@ -8,10 +9,19 @@ namespace SeleniumFramework.Pages
 
         private IWebElement LoggedUserAnchor => _driver.FindElement(By.XPath("//a[@id='navbarDropdown']"));
         private IWebElement UsernameHeader => _driver.FindElement(By.XPath("//div[contains(@class, 'container-fluid')]/h1"));
-        
+        private IWebElement LogoutButton => _driver.FindElement(By.XPath("//a[text()=' Logout']"));
+
         public DashboardPage(IWebDriver driver)
         {
             this._driver = driver;
+        }
+
+        public void Logout()
+        {
+            this.LoggedUserAnchor.Click();
+
+            _driver.WaitUntilElementIsClickable(this.LogoutButton);
+            this.LogoutButton.Click();
         }
 
         public void VerifyLoggedUserEmailIs(string expectedUserEmail)

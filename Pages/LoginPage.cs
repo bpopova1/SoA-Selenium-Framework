@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using OpenQA.Selenium;
 using SeleniumFramework.Extensions;
 
 namespace SeleniumFramework.Pages
@@ -23,7 +24,7 @@ namespace SeleniumFramework.Pages
             this.EmailInput.SendKeys(email);
             this.PasswordInput.SendKeys(password);
 
-            this.SubmitButton.Click();
+            _driver.ScrollToElementAndClick(this.SubmitButton);
         }
 
         public bool IsPasswordEmpty()
@@ -42,6 +43,16 @@ namespace SeleniumFramework.Pages
         {
             string errorDialogText = _driver.FindElement(By.ClassName("alert")).Text;
             Assert.That(errorDialogText, Is.EqualTo(errorMessage));
+        }
+
+        public void VerifyTheFormIsVisible()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(EmailInput.Displayed, Is.True);
+                Assert.That(PasswordInput.Displayed, Is.True);
+                Assert.That(SubmitButton.Displayed, Is.True);
+            });
         }
     }
 }
